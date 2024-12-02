@@ -1,0 +1,46 @@
+package expressivo;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class CommandsTest {
+
+    @ParameterizedTest
+    @CsvSource({
+            "1, x, 0",
+            "c, x, 0",
+            "x, x, 1",
+            "1+1, x, 0",
+            "x+2, x, 1",
+            "x+x, x, 2"
+    })
+    public void expressionsCanBeDifferentiated(String inputExpr, String variable, String expectedOutput) {
+        assertEquals(expectedOutput, Commands.differentiate(inputExpr, variable));
+    }
+
+    @ParameterizedTest
+    @MethodSource("simplifyTestData")
+    public void expressionsCanBeSimplified(String input, Map<String, Double> environment, String expectedResult) {
+        assertEquals(expectedResult, Commands.simplify(input, environment));
+    }
+
+    private static Stream<Object[]> simplifyTestData() {
+        return Stream.of(
+                new Object[]{"1", Map.of("x", 5.), "1"},
+                new Object[]{"y", Map.of("x", 5.), "y"},
+                new Object[]{"x", Map.of("x", 5.), "5"},
+                new Object[]{"x+y+z", Map.of("x", 1., "y", 2.), "1+2+z"},
+                new Object[]{"t+u+v+w+x+y+z", Map.of("x", 1., "y", 2.), "t+u+v+w+1+2+z"},
+                new Object[]{"x*y*z", Map.of("x", 5., "y", 10.5), "5*10.5*z"},
+                new Object[]{"t*u*v*w*x*y*z", Map.of("x", 5., "y", 10.5), "t*u*v*w*5*10.5*z"},
+                new Object[]{"x+1", Map.of("x", 1.), "2"}
+        );
+    }
+}
